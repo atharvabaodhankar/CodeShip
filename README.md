@@ -1,111 +1,158 @@
 # CodeShip
 
-CodeShip is a self-hosted, lightweight Platform-as-a-Service (PaaS) designed to provide a zero-config, Vercel-like developer experience running entirely on your own single VPS. It automates the entire lifecycle of cloning, building, isolating, and routing applications with automatic HTTPS.
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 15" />
+  <img src="https://img.shields.io/badge/Node.js-v22-green?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js v22" />
+  <img src="https://img.shields.io/badge/Docker-CE-blue?style=for-the-badge&logo=docker&logoColor=white" alt="Docker CE" />
+  <img src="https://img.shields.io/badge/Nginx-Proxy-darkgreen?style=for-the-badge&logo=nginx&logoColor=white" alt="Nginx" />
+  <img src="https://img.shields.io/badge/Prisma-ORM-teal?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma ORM" />
+</p>
+
+CodeShip is a self-hosted, lightweight Platform-as-a-Service (PaaS) inspired by Vercel and Render. It provides a zero-config, push-to-deploy developer experience running entirely on your own single VPS. CodeShip automates the entire lifecycle of cloning, building, isolating (Docker), securing (wildcard SSL), and routing (Nginx) your applications.
 
 ---
 
-## 🚀 Architectural Overview
+## 🏗️ Core Architecture
 
-```text
-GitHub Push (User App)
-       │
-       ▼ (Webhook)
-┌─────────────────────────────────────────────────────────┐
-│ CodeShip Next.js 15 Dashboard & API (Port 3000)         │
-└──────────────┬──────────────────────────────────────────┘
-               │ (Enqueue Job)
-               ▼
-┌─────────────────────────────────────────────────────────┐
-│ Redis & BullMQ Queue Manager (Port 6379)                │
-└──────────────┬──────────────────────────────────────────┘
-               │ (Process Job)
-               ▼
-┌─────────────────────────────────────────────────────────┐
-│ CodeShip Background Worker (Node.js Daemon)             │
-└──────────────┬─────────────────────────────┬────────────┘
-               │                             │
-               ▼ (Programmatic Build)        ▼ (Proxy Config)
- ┌───────────────────────────┐  ┌───────────────────────────┐
- │ Docker Engine             │  │ Nginx Reverse Proxy       │
- │ ├── App 1 (Port 3001)     │  │ ├── app1.apps.domain (443)│
- │ ├── App 2 (Port 3002)     │  │ ├── app2.apps.domain (443)│
- │ └── App 3 (Port 3003)     │  │ └── codeship.domain (443) │
- └───────────────────────────┘  └───────────────────────────┘
+CodeShip uses a decoupled, event-driven architecture to coordinate between the Next.js web console and the background execution workers. This ensures the web UI remains fast and responsive while heavy container builds run safely in a managed queue.
+
+```mermaid
+flowchart TD
+    %% Define Styles
+    classDef main fill:#000,stroke:#333,stroke-width:2px,color:#fff;
+    classDef db fill:#111,stroke:#444,stroke-width:1px,color:#ccc;
+    classDef container fill:#050505,stroke:#222,stroke-width:1px,color:#aaa;
+
+    subgraph UserSpace ["Client & Developer Workspace"]
+        Developer["💻 Developer<br>git push"]
+        User["🌐 End User<br>HTTPS Request"]
+    end
+
+    subgraph GitHub ["GitHub Infrastructure"]
+        Repo["🐙 GitHub Repository"]
+        Webhook["🔗 Webhook Event"]
+    end
+
+    subgraph VPS ["CodeShip Single-VPS Infrastructure (DigitalOcean)"]
+        subgraph ControlPlane ["Control Plane (PM2 Managed)"]
+            NextJS["⚡ Next.js 15 Web App<br>Dashboard & API"]
+            Worker["⚙️ Deployment Worker<br>Node.js Daemon"]
+        end
+
+        subgraph DBQueue ["Storage & Queue Layer"]
+            Redis[("🔴 Redis & BullMQ<br>Job Queue")]
+            Postgres[("🐘 PostgreSQL<br>Prisma DB")]
+        end
+
+        subgraph Routing ["Routing Layer"]
+            Nginx["🛡️ Nginx Reverse Proxy<br>SSL via Certbot"]
+        end
+
+        subgraph Containers ["Application Runtime"]
+            App1["📦 User App 1<br>Docker Container (Port 3001)"]
+            App2["📦 User App 2<br>Docker Container (Port 3002)"]
+        end
+    end
+
+    %% Connections
+    Developer -->|Push Code| Repo
+    Repo -->|Trigger| Webhook
+    Webhook -->|POST /api/webhooks/github| NextJS
+    
+    NextJS -->|1. Write Meta| Postgres
+    NextJS -->|2. Enqueue Job| Redis
+    Redis -->|3. Poll Job| Worker
+    
+    Worker -->|4. Pull Repo & Build| Repo
+    Worker -->|5. Launch Container| App1
+    Worker -->|5. Launch Container| App2
+    Worker -->|6. Write Config & Reload| Nginx
+    
+    User -->|HTTPS Request| Nginx
+    Nginx -->|Proxy Pass| App1
+    Nginx -->|Proxy Pass| App2
+
+    %% Assign Classes
+    class NextJS,Worker main;
+    class Redis,Postgres db;
+    class App1,App2,Nginx container;
 ```
 
 ---
 
-## 🛠️ Technology Stack: What, How, and Why
+## 📊 Framework Support Matrix
 
-CodeShip is built as an npm monorepo utilizing workspaces to keep the codebase modular, type-safe, and highly performant.
+CodeShip automatically inspects your repository, detects the framework, generates an optimized Dockerfile, and provisions the routing configurations.
 
-### 1. The Core Runtime: Next.js 15, TypeScript & Tailwind CSS
-* **What we used**: Next.js 15 App Router, TypeScript, and a Stark Monochrome Tailwind theme.
-* **How we used it**: Built a unified management dashboard for managing projects, managing environment variables, viewing deployment histories, and polling real-time build log consoles.
-* **Why we used it**: Next.js 15 provides excellent server-side rendering (SSR) capabilities for security, high-performance static page optimization for the dashboard, and a clean API routing layer. TypeScript guarantees type-safety across the monorepo, while the monochrome aesthetic delivers a premium, developer-focused, high-contrast user interface.
-
-### 2. Database & State: PostgreSQL & Prisma ORM
-* **What we used**: PostgreSQL database served via Docker, managed through Prisma ORM.
-* **How we used it**: Created models for `User` (OAuth profiles), `Project` (active configurations, frameworks, and ports), `Deployment` (execution logs and build statuses), and `EnvironmentVariable` (stored encrypted).
-* **Why we used it**: PostgreSQL provides robust relational integrity, which is critical for mapping users, projects, and deployments. Prisma provides a type-safe database client shared directly across the frontend and worker workspaces, preventing runtime SQL errors and speeding up schema migrations.
-
-### 3. Background Job Processing: Redis & BullMQ
-* **What we used**: Redis cache in Docker orchestrating a BullMQ message queue.
-* **How we used it**: Implemented a lazy-loading queue pattern in the Next.js app to enqueue build jobs without blocking Next.js build-time static generation. A background Node.js daemon (the worker) listens to the queue and processes builds sequentially.
-* **Why we used it**: Repository compilation and Docker builds are long-running, resource-intensive tasks. Moving these tasks out of the HTTP request-response lifecycle into a reliable, persistent background queue prevents timeouts, ensures sequential resource usage on a single VPS, and allows real-time execution tracking.
-
-### 4. Containerization: Docker Engine (Official CE)
-* **What we used**: Docker Engine Community Edition, managing isolated, resource-constrained containers.
-* **How we used it**: The worker programmatically clones repositories, automatically detects the project framework, writes an optimized `Dockerfile` on the fly, builds the container image, and launches it with memory limits (`512MB`) and CPU limits (`0.5 CPU`). It also automatically prunes dangling build layers and deletes obsolete older deployment images to prevent VPS disk exhaustion.
-* **Why we used it**: Docker provides complete OS-level virtualization and process isolation. By restricting CPU and RAM, we ensure a single heavy user application cannot crash the host VPS or affect other deployments.
-
-### 5. Reverse Proxy: Nginx
-* **What we used**: Nginx web server acting as a reverse proxy and routing engine.
-* **How we used it**: When a container starts, the worker dynamically generates a custom Nginx configuration block at `/etc/nginx/sites-enabled/<project-slug>.conf`, proxying the subdomain (e.g., `app.apps.domain`) to the container's allocated host port, and reloads Nginx using a passwordless sudoers rule.
-* **Why we used it**: Nginx is highly efficient, secure, and can handle thousands of concurrent requests. It acts as the gateway of the VPS, keeping internal application ports (`3001-9999`) safely closed behind the firewall while routing external web traffic seamlessly.
-
-### 6. SSL Encryption: Certbot & Let's Encrypt Wildcard Certificates
-* **What we used**: Certbot Nginx and manual DNS plugins.
-* **How we used it**: Configured a wildcard SSL certificate (`*.apps.domain`) on the VPS. The worker automatically detects the presence of this certificate and upgrades deployments from HTTP (port `80`) to secure HTTPS (port `443`) with automatic HTTP-to-HTTPS redirects.
-* **Why we used it**: Modern web applications require SSL/TLS to protect user data. A wildcard certificate allows us to secure an infinite number of dynamic subdomains without needing to request a new certificate for every single project deployment, avoiding Let's Encrypt rate limits.
+| Framework | Detection Signatures | Containerization Method | Default Port |
+| :--- | :--- | :--- | :--- |
+| **React (Vite)** | `package.json` with `react`/`react-dom` + `vite` | **Multi-Stage Build**: Compiles Vite assets, copies `dist` to a lightweight `nginx:alpine` image. | `80` (internal) |
+| **Vanilla Static** | `index.html` at the repository root | **Single-Stage Build**: Copies files directly to a lightweight `nginx:alpine` image. No Node.js build overhead. | `80` (internal) |
+| **Next.js** | `package.json` with `next` | **Production Node Build**: Installs dependencies, compiles Next.js pages, starts server (`next start`) on `node:20-alpine`. | `3000` (internal) |
+| **Express.js** | `package.json` with `express` | **Node Production Server**: Installs dependencies and boots the server (`npm start`) on `node:20-alpine`. | `3000` (internal) |
 
 ---
 
-## 📦 Monorepo Workspaces
+## 🛠️ Technology Deep-Dive: What, How, and Why
 
-The repository is structured as a modular npm monorepo:
-* **`apps/web`**: Next.js 15 frontend dashboard, custom GitHub OAuth handlers, API endpoints, and real-time log polling.
-* **`apps/worker`**: Background BullMQ worker daemon that runs git clone, framework detection, Docker builds, port allocation, and Nginx reloads.
-* **`packages/db`**: Core database layer containing the Prisma schema, migrations, and the singleton Prisma Client.
-* **`packages/shared`**: Utility library containing AES-256-GCM encryption/decryption functions (used to protect environment variables in the database) and OS/Docker host socket detection helpers.
-* **`infrastructure/`**: Deployment automation containing VPS bootstrapping scripts and production Nginx templates.
+CodeShip is organized as a modular npm monorepo utilizing workspaces to isolate packages, speed up compilation times, and share libraries across workspaces.
+
+### ⚡ Control Plane: Next.js 15, TypeScript & Tailwind CSS
+* **What**: Next.js 15 App Router, TypeScript, and a high-contrast monochrome Tailwind CSS UI.
+* **How**: Houses the developer dashboard, JWT-based GitHub OAuth routes, cascades project deletions (terminating active Docker containers), and streams live build terminal logs.
+* **Why**: Next.js 15 provides excellent server-side rendering (SSR) for session verification, high-performance static optimization for the dashboard, and clean API handlers. The monochrome theme delivers a premium, distraction-free, terminal-style interface for developers.
+
+### 🐘 Database Schema: PostgreSQL & Prisma ORM
+* **What**: PostgreSQL database combined with Prisma Object-Relational Mapping (ORM).
+* **How**: Persists models for `User` (OAuth profiles), `Project` (metadata, slugs, frameworks, and host ports), `Deployment` (execution logs and status records), and `EnvironmentVariable` (stored encrypted).
+* **Why**: PostgreSQL provides reliable ACID transactions, which are essential when mapping users to their respective projects and deployments. Prisma exports a type-safe client shared directly between the web API and the background worker, eliminating database query errors.
+
+### 🔴 Job Queue: Redis & BullMQ
+* **What**: Redis in-memory cache backing a BullMQ message queue.
+* **How**: The Next.js API enqueues build jobs lazily. This lazy-loading pattern prevents establishing unnecessary Redis connections during Next.js static build times. The background worker polls jobs sequentially.
+* **Why**: Docker image builds and repository clones are highly resource-intensive tasks. Moving these operations into a persistent queue prevents HTTP request timeouts, protects the VPS CPU from spiking under concurrent deployments, and allows streaming logs in real-time.
+
+### 📦 Containerization: Docker Engine (Official CE)
+* **What**: Docker Community Edition container runtime.
+* **How**: Clones the codebase, generates an optimized `Dockerfile` dynamically, runs `docker build`, and launches the container. Deployed containers are secured with strict resource limits:
+  * **Memory Limit**: `512MB`
+  * **CPU Allocation**: `0.5 vCPU`
+  * **Disk Protection**: Automatically runs `docker image prune -f` after builds and queries the DB to delete obsolete older deployment images.
+* **Why**: Docker provides process isolation and sandboxing. Restricting CPU and RAM ensures that a single misconfigured user application cannot crash the host VPS or impact neighbor deployments.
+
+### 🛡️ Routing & SSL: Nginx, Certbot & Wildcard Certificates
+* **What**: Nginx reverse proxy secured by a Let's Encrypt Wildcard Certificate (`*.apps.domain`).
+* **How**: The worker dynamically writes Nginx configurations at `/etc/nginx/sites-enabled/<project-slug>.conf` mapping the subdomain (e.g. `test-api.apps.domain`) to the allocated host port, and reloads Nginx via a passwordless sudoers rule. The worker automatically detects the wildcard certificate on the host to configure HTTPS (port `443`) and HTTP-to-HTTPS redirects.
+* **Why**: Nginx serves as the secure entry point of the VPS, keeping internal application ports (`3001-9999`) safely hidden behind the firewall. A wildcard SSL certificate allows securing an infinite number of subdomains instantly without hitting Let's Encrypt rate limits.
 
 ---
 
-## ⚙️ Production Deployments & Workflows
+## 🔒 Production Hardening & Security
 
-CodeShip is built to deploy and update itself with zero manual intervention.
+CodeShip is built with strict security practices to ensure host stability and data privacy:
 
-### 1. Deployed App CI/CD Workflow
-Once you deploy an application on your CodeShip dashboard, you can configure continuous deployment:
+> [!IMPORTANT]
+> **Environment Variable Encryption (AES-256-GCM)**:
+> All user-defined environment variables (like database credentials, APIs keys, etc.) are encrypted before being written to the PostgreSQL database. CodeShip uses a shared library (`packages/shared`) implementing Node's native `crypto` module (AES-256-GCM) combined with a SHA-256 key derivation function. Deployed containers only receive the decrypted values at container boot time.
+
+> [!WARNING]
+> **Host Port Isolation (Firewall)**:
+> Although user applications are bound to host ports in the `3001–9999` range, the VPS firewall (`ufw`) blocks all external public access to this port range. The only way to access a user application is through the Nginx reverse proxy, which acts as the secure gatekeeper.
+
+---
+
+## 🔄 Continuous Delivery (CD) Pipelines
+
+CodeShip implements a dual-pipeline CD model:
+
+### 1. User Application CD (Automatic Webhooks)
 ```text
-[ Developer runs: git push ]
-             │
-             ▼
-[ GitHub triggers Webhook POST to CodeShip ]
-             │
-             ▼
-[ CodeShip API creates Deployment and Enqueues Job ]
-             │
-             ▼
-[ Worker clones repo -> Builds Docker Image -> Replaces Container -> Reloads Nginx ]
-             │
-             ▼
-[ New code is instantly live with zero downtime ]
+[ Developer runs: git push ] ──► [ GitHub Webhook POST ] ──► [ CodeShip API ] ──► [ BullMQ Queue ] ──► [ Worker Rebuilds Container ]
 ```
+Once configured, pushing code to your application's GitHub repository instantly triggers a background build. CodeShip compiles the new code, starts the new container, swaps the Nginx routing targets, and shuts down the old container, achieving a zero-downtime redeployment.
 
-### 2. CodeShip Self-Update (Continuous Delivery)
-The CodeShip platform itself utilizes a automated GitHub Actions workflow (`.github/workflows/deploy.yml`) for continuous delivery:
-1. When code is pushed to the `main` branch of the CodeShip repository, a GitHub Actions runner is triggered.
-2. The runner connects to the production VPS securely via SSH using an authorized private key secret (`VPS_SSH_KEY`).
-3. It executes the `./update.sh` script on the VPS, which pulls the latest code, installs new npm packages, runs Prisma database migrations, compiles the Next.js and worker builds, and restarts the services under the **PM2** process manager.
+### 2. CodeShip Platform CD (GitHub Actions & PM2)
+The CodeShip platform itself is fully automated via GitHub Actions:
+1. Pushing to the `main` branch of the CodeShip repository triggers the `.github/workflows/deploy.yml` workflow.
+2. The runner connects to the production VPS via SSH using an authorized private key secret (`VPS_SSH_KEY`).
+3. The runner executes the `./update.sh` script, which pulls the latest platform code, installs npm packages, runs Prisma database migrations, rebuilds Next.js and the worker, and restarts all services under the **PM2** process manager.
