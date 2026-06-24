@@ -31,6 +31,9 @@ echo "Installing Nginx..."
 sudo apt-get install -y nginx
 sudo systemctl start nginx
 sudo systemctl enable nginx
+# Configure passwordless sudo for Nginx reload (Option B)
+echo "Configuring passwordless sudo for Nginx reload..."
+echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/nginx" | sudo tee /etc/sudoers.d/codeship-nginx
 
 # 5. Install Node.js v22 and npm
 echo "Installing Node.js v22..."

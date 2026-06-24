@@ -258,7 +258,9 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
 
   const getFrameworkLabel = (fw: string) => {
     switch (fw) {
-      case 'react': return 'React (Vite)';
+      case 'react':
+      case 'react-vite':
+        return 'React (Vite)';
       case 'nextjs': return 'Next.js';
       case 'express': return 'Express.js';
       default: return fw;

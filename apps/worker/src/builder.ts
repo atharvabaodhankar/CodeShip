@@ -176,18 +176,23 @@ export async function buildAndDeploy(deploymentId: string): Promise<void> {
     const packageJson = JSON.parse(packageJsonContent);
     const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
 
-    let framework = 'express'; // default fallback
+    let framework = '';
     let internalPort = 3000;
     
     if (deps.next) {
       framework = 'nextjs';
       internalPort = 3000;
-    } else if (deps.react || deps['react-dom']) {
-      framework = 'react';
+    } else if ((deps.react || deps['react-dom']) && deps.vite) {
+      framework = 'react-vite';
       internalPort = 80; // React app served via Nginx in container
     } else if (deps.express) {
       framework = 'express';
       internalPort = 3000;
+    } else {
+      throw new Error(
+        'Unsupported framework. CodeShip MVP only supports Next.js, React (Vite), and Express.js applications. ' +
+        'Ensure your package.json contains "next", "express", or both "react" and "vite" in dependencies.'
+      );
     }
 
     await prisma.project.update({
@@ -201,7 +206,7 @@ export async function buildAndDeploy(deploymentId: string): Promise<void> {
     const dockerfilePath = path.join(projectBuildPath, 'Dockerfile');
     let dockerfileContent = '';
 
-    if (framework === 'react') {
+    if (framework === 'react-vite') {
       dockerfileContent = `
 # Stage 1: Build
 FROM node:20-alpine AS builder
@@ -257,6 +262,14 @@ CMD ["npm", "start"]
     await appendLog(`Building Docker image: ${fullImageName}...\n`);
     await runCommand('docker', ['build', '-t', fullImageName, '.'], projectBuildPath, appendLog);
     await appendLog(`Successfully built Docker image.\n`);
+
+    // Clean up intermediate dangling builder stages to save disk space
+    try {
+      await appendLog(`Pruning dangling Docker build layers...\n`);
+      await runCommand('docker', ['image', 'prune', '-f'], process.cwd(), () => {});
+    } catch (e) {
+      // Ignore prune errors
+    }
 
     // 6. Allocate Port
     // If the project already has an assigned port, reuse it. Otherwise, allocate a new one.
@@ -315,6 +328,29 @@ CMD ["npm", "start"]
     const runResult = await runCommand('docker', dockerArgs, process.cwd(), appendLog);
     const newContainerId = runResult.stdout.trim().slice(0, 12);
     await appendLog(`Container started. ID: ${newContainerId}\n`);
+
+    // Clean up old Docker images for this project to prevent VPS disk filling
+    try {
+      const oldDeployments = await prisma.deployment.findMany({
+        where: {
+          projectId: project.id,
+          status: 'READY',
+          id: { not: deploymentId },
+        },
+      });
+      for (const oldDep of oldDeployments) {
+        const oldImageName = `codeship-${project.id.toLowerCase()}:${oldDep.id.toLowerCase()}`;
+        await appendLog(`Cleaning up old Docker image: ${oldImageName}...\n`);
+        try {
+          await runCommand('docker', ['rmi', oldImageName], process.cwd(), () => {});
+          await appendLog(`Removed old image: ${oldImageName}\n`);
+        } catch (e) {
+          // Ignore if image not found or already deleted
+        }
+      }
+    } catch (err) {
+      await appendLog(`[Warning] Old image cleanup encountered an error: ${(err as any).message}\n`);
+    }
 
     // 10. Configure Nginx Proxy
     await appendLog(`Generating Nginx configuration...\n`);

@@ -41,7 +41,7 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState('');
   const [githubRepo, setGithubRepo] = useState('');
-  const [framework, setFramework] = useState('react');
+  const [framework, setFramework] = useState('react-vite');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -128,7 +128,7 @@ export default function Dashboard() {
       // Reset form
       setName('');
       setGithubRepo('');
-      setFramework('react');
+      setFramework('react-vite');
       
       // Redirect to the new project details page
       router.push(`/projects/${data.project.id}`);
@@ -187,7 +187,9 @@ export default function Dashboard() {
 
   const getFrameworkLabel = (fw: string) => {
     switch (fw) {
-      case 'react': return 'React (Vite)';
+      case 'react':
+      case 'react-vite':
+        return 'React (Vite)';
       case 'nextjs': return 'Next.js';
       case 'express': return 'Express.js';
       default: return fw;
@@ -417,7 +419,7 @@ export default function Dashboard() {
                   disabled={submitting}
                   className="bg-black border border-neutral-900 rounded px-4 py-3 text-sm focus:border-neutral-700 focus:outline-none transition-colors disabled:opacity-50"
                 >
-                  <option value="react">React (Vite)</option>
+                  <option value="react-vite">React (Vite)</option>
                   <option value="nextjs">Next.js</option>
                   <option value="express">Express.js</option>
                 </select>
