@@ -18,9 +18,11 @@ sudo apt-get upgrade -y
 echo "Installing git, curl, and build-essential..."
 sudo apt-get install -y git curl build-essential
 
-# 3. Install Docker and Docker Compose
+# 3. Install Docker and Docker Compose (Official CE)
 echo "Installing Docker and Docker Compose..."
-sudo apt-get install -y docker.io docker-compose
+# Remove any conflicting older docker packages
+sudo apt-get remove -y docker docker-engine docker.io containerd runc || true
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 sudo systemctl start docker
 sudo systemctl enable docker
 # Add current user to docker group to run without sudo
