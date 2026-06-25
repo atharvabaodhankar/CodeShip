@@ -32,10 +32,10 @@ export default function SidebarLayout({
   const router = useRouter();
 
   return (
-    <div className="flex bg-black min-h-screen text-white w-full">
+    <div className="flex bg-[#0C0C0E] min-h-screen text-white w-full">
       
       {/* Persistent Left Sidebar */}
-      <nav className="fixed left-0 top-0 h-screen w-sidebar-width border-r border-layout bg-[#050505] flex flex-col py-stack-md z-40 hidden md:flex">
+      <nav className="fixed left-0 top-0 h-screen w-sidebar-width border-r border-layout bg-[#070708] flex flex-col py-stack-md z-40 hidden md:flex">
         {/* Brand Logo & Title */}
         <div 
           onClick={() => router.push('/dashboard')}
@@ -63,7 +63,7 @@ export default function SidebarLayout({
           </a>
           
           <a 
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/projects')}
             className={`flex items-center gap-3 px-3 py-2 rounded transition-colors duration-200 cursor-pointer active:scale-95 text-sm ${
               activeLink === 'projects'
                 ? 'bg-surface-container-high text-primary font-bold border-r-2 border-primary'
@@ -136,7 +136,7 @@ export default function SidebarLayout({
         </div>
         
         {/* User Session Profile & Log Out */}
-        <div className="px-stack-sm mt-auto pt-stack-md border-t border-layout mx-stack-sm flex flex-col gap-2 bg-[#050505]">
+        <div className="px-stack-sm mt-auto pt-stack-md border-t border-layout mx-stack-sm flex flex-col gap-2 bg-[#070708]">
           {user && (
             <div className="flex items-center gap-3 px-3 py-2 rounded text-neutral-300 select-none">
               <img
@@ -163,7 +163,7 @@ export default function SidebarLayout({
       <div className="md:ml-sidebar-width min-h-screen flex flex-col w-full flex-1 transition-all duration-150">
         
         {/* Top Header Bar */}
-        <header className="h-16 px-page-padding flex justify-between items-center border-b border-layout bg-[#050505]/85 backdrop-blur-sm z-30 sticky top-0 w-full">
+        <header className="h-16 px-page-padding flex justify-between items-center border-b border-layout bg-[#070708]/85 backdrop-blur-sm z-30 sticky top-0 w-full">
           {/* Breadcrumbs or Title */}
           <div className="font-headline-lg text-headline-lg font-bold text-primary flex items-center gap-4">
             {breadcrumbs ? (
@@ -197,7 +197,7 @@ export default function SidebarLayout({
         </header>
 
         {/* Dynamic Page Canvas */}
-        <main className="flex-grow overflow-y-auto p-6 bg-black w-full flex flex-col gap-6">
+        <main className="flex-grow overflow-y-auto p-6 bg-[#0C0C0E] w-full flex flex-col gap-6">
           {children}
         </main>
       </div>

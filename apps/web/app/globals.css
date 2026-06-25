@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
+  --background: #0C0C0E;
+  --foreground: #F4F4F5;
 }
 
 body {
@@ -21,16 +21,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: #0C0C0E;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #262626;
+  background: #27272A;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #404040;
+  background: #3F3F46;
 }
 
 /* Custom animations for micro-interactions */
@@ -51,12 +51,12 @@ body {
 
 /* Custom styles for dashboard glassmorphism and grids */
 .monochrome-border {
-  border: 1px solid #262626;
+  border: 1px solid #27272A;
   transition: border-color 0.2s ease;
 }
 
 .monochrome-border:hover {
-  border-color: #404040;
+  border-color: #3F3F46;
 }
 
 .monochrome-focus:focus {
@@ -64,14 +64,14 @@ body {
   outline-offset: 2px;
 }
 
-/* Mockup Layout Utility Classes */
+/* Layered Dark Theme Utility Classes */
 .border-layout {
-  border-color: #1a1a1a;
+  border-color: #1E1E22;
 }
 .card-bg {
-  background-color: #0b0b0b;
+  background-color: #131316;
 }
 .hover-bg:hover {
-  background-color: #111111;
+  background-color: #1A1A20;
 }
 
