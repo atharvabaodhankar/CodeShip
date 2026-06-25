@@ -410,7 +410,7 @@ export default function Dashboard() {
     return (
       <div className="flex-grow flex flex-col justify-center items-center bg-black text-white h-screen">
         <Loader2 className="animate-spin text-white mb-4" size={32} />
-        <p className="font-mono text-sm tracking-widest text-neutral-500">LOADING CODESHIP...</p>
+        <p className="font-mono text-sm tracking-widest text-neutral-500">LOADING ROVEL...</p>
       </div>
     );
   }
@@ -459,7 +459,7 @@ export default function Dashboard() {
       {/* Title & Actions Row */}
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="font-display text-2xl md:text-3xl font-extrabold text-primary mb-1 tracking-tight">CodeShip Dashboard</h1>
+          <h1 className="font-display text-2xl md:text-3xl font-extrabold text-primary mb-1 tracking-tight">Rovel Dashboard</h1>
           <p className="font-body-md text-body-md text-neutral-500 text-sm font-light">Overview of your infrastructure and active deployments.</p>
         </div>
         <button 

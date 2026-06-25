@@ -59,7 +59,7 @@ export async function DELETE(
     }
 
     // Attempt to stop and remove the Docker container if it exists
-    const containerName = `codeship-${project.slug}`;
+    const containerName = `rovel-${project.slug}`;
     try {
       console.log(`[Dashboard] Cleaning up container ${containerName} due to project deletion...`);
       await execAsync(`docker stop ${containerName} && docker rm ${containerName}`);

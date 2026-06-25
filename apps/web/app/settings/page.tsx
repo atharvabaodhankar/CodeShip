@@ -305,7 +305,7 @@ export default function GlobalSettings() {
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-primary">Documentation</h2>
               <p className="text-neutral-500 text-sm font-light mt-1">
-                Learn how to deploy, manage, and scale your applications on CodeShip.
+                Learn how to deploy, manage, and scale your applications on Rovel.
               </p>
             </div>
 
@@ -313,7 +313,7 @@ export default function GlobalSettings() {
               <section className="flex flex-col gap-2">
                 <h3 className="text-base font-bold text-white font-mono uppercase tracking-wider">1. Connecting Repositories</h3>
                 <p>
-                  CodeShip allows you to import repositories from your GitHub account. 
+                  Rovel allows you to import repositories from your GitHub account. 
                   When you connect a public repository, the platform will pull the source code, 
                   automatically identify the framework from the dependencies, and allocate a dedicated host port for internal routing.
                 </p>
@@ -377,7 +377,7 @@ export default function GlobalSettings() {
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-primary">Get Platform Support</h2>
               <p className="text-neutral-500 text-sm font-light mt-1">
-                Submit an inquiry directly to the CodeShip operations team.
+                Submit an inquiry directly to the Rovel operations team.
               </p>
             </div>
 

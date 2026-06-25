@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     const clientSecret = process.env.GITHUB_CLIENT_SECRET;
     const headers: Record<string, string> = {
       Accept: 'application/vnd.github.v3+json',
-      'User-Agent': 'CodeShip-App',
+      'User-Agent': 'Rovel-App',
     };
 
     if (clientId && clientSecret) {

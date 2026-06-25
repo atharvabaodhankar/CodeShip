@@ -104,7 +104,7 @@ export async function GET(request: Request) {
 
     // 6. Set Cookie & Redirect
     const cookieStore = await cookies();
-    cookieStore.set('codeship_session', sessionToken, {
+    cookieStore.set('rovel_session', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

@@ -214,7 +214,7 @@ export async function buildAndDeploy(deploymentId: string): Promise<void> {
 
     if (!framework) {
       throw new Error(
-        'Unsupported framework. CodeShip MVP supports Next.js, React (Vite), Express.js, or vanilla static sites (index.html at root).'
+        'Unsupported framework. Rovel supports Next.js, React (Vite), Express.js, or vanilla static sites (index.html at root).'
       );
     }
 
@@ -285,7 +285,7 @@ CMD ["npm", "start"]
     await appendLog(`Dockerfile generated.\n`);
 
     // 5. Build Docker Image
-    const imageName = `codeship-${project.id.toLowerCase()}`;
+    const imageName = `rovel-${project.id.toLowerCase()}`;
     const imageTag = deploymentId.toLowerCase();
     const fullImageName = `${imageName}:${imageTag}`;
 
@@ -317,7 +317,7 @@ CMD ["npm", "start"]
     }
 
     // 7. Stop and remove existing container for this project
-    const containerName = `codeship-${project.slug}`;
+    const containerName = `rovel-${project.slug}`;
     await appendLog(`Cleaning up old containers with name ${containerName}...\n`);
     try {
       await runCommand('docker', ['stop', containerName], process.cwd(), () => {});
@@ -371,7 +371,7 @@ CMD ["npm", "start"]
         },
       });
       for (const oldDep of oldDeployments) {
-        const oldImageName = `codeship-${project.id.toLowerCase()}:${oldDep.id.toLowerCase()}`;
+        const oldImageName = `rovel-${project.id.toLowerCase()}:${oldDep.id.toLowerCase()}`;
         await appendLog(`Cleaning up old Docker image: ${oldImageName}...\n`);
         try {
           await runCommand('docker', ['rmi', oldImageName], process.cwd(), () => {});

@@ -14,7 +14,7 @@ export async function GET() {
     
     const headers: Record<string, string> = {
       Accept: 'application/vnd.github.v3+json',
-      'User-Agent': 'CodeShip-App',
+      'User-Agent': 'Rovel-App',
     };
 
     if (clientId && clientSecret) {

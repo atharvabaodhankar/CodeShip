@@ -25,7 +25,7 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
 
 export async function getSessionUser() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('codeship_session')?.value;
+  const token = cookieStore.get('rovel_session')?.value;
   if (!token) return null;
 
   const payload = await verifySession(token);
@@ -42,7 +42,7 @@ export async function getSessionUser() {
 export async function getGitHubToken(): Promise<string | null> {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('codeship_session')?.value;
+    const token = cookieStore.get('rovel_session')?.value;
     if (!token) return null;
 
     const payload = await verifySession(token);

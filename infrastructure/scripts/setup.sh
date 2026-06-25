@@ -35,17 +35,17 @@ sudo systemctl start nginx
 sudo systemctl enable nginx
 # Configure passwordless sudo for Nginx reload (Option B)
 echo "Configuring passwordless sudo for Nginx reload..."
-echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/nginx" | sudo tee /etc/sudoers.d/codeship-nginx
+echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/nginx" | sudo tee /etc/sudoers.d/rovel-nginx
 
 # 5. Install Node.js v22 and npm
 echo "Installing Node.js v22..."
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# 6. Create directories for CodeShip builds
-echo "Setting up CodeShip directories..."
-sudo mkdir -p /opt/codeship/builds
-sudo chown -R $USER:$USER /opt/codeship
+# 6. Create directories for Rovel builds
+echo "Setting up Rovel directories..."
+sudo mkdir -p /opt/rovel/builds
+sudo chown -R $USER:$USER /opt/rovel
 
 # 7. Open Ports in firewall (UFW)
 echo "Configuring firewall (UFW)..."

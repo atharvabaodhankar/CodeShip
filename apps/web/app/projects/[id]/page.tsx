@@ -773,8 +773,8 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                     <div className="flex flex-col gap-3">
                       <div className="flex justify-between items-center border-b border-layout pb-2.5">
                         <span className="font-body-sm text-neutral-500 text-sm">Image</span>
-                        <span className="font-code-sm text-primary font-mono text-xs truncate max-w-[150px]" title={`codeship/${project.slug}:latest`}>
-                          codeship/{project.slug}:latest
+                        <span className="font-code-sm text-primary font-mono text-xs truncate max-w-[150px]" title={`rovel/${project.slug}:latest`}>
+                          rovel/{project.slug}:latest
                         </span>
                       </div>
                       <div className="flex justify-between items-center border-b border-layout pb-2.5">
@@ -1064,7 +1064,7 @@ export default function ProjectDetails({ params }: { params: Promise<{ id: strin
                 <div className="flex flex-col gap-1">
                   <span className="text-neutral-500 text-[10px] font-mono uppercase">Docker Container Name</span>
                   <span className="font-mono text-neutral-300 text-sm bg-black border border-layout px-2 py-1 rounded w-fit select-all font-light">
-                    codeship-{project.slug}
+                    rovel-{project.slug}
                   </span>
                 </div>
                 <div className="flex flex-col gap-1">

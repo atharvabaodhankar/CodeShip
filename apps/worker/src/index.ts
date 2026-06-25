@@ -11,7 +11,7 @@ const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 const queueName = 'deployments';
 
 console.log('----------------------------------------------------');
-console.log('CodeShip Deployment Worker Initializing...');
+console.log('Rovel Deployment Worker Initializing...');
 console.log(`Connecting to Redis at: ${REDIS_URL}`);
 console.log(`Listening on Queue: '${queueName}'`);
 console.log('----------------------------------------------------');
@@ -72,4 +72,4 @@ worker.on('failed', (job, err) => {
   console.error(`[Job ${job?.id}] Job failed:`, err);
 });
 
-console.log('CodeShip background worker is running and waiting for jobs...');
+console.log('Rovel background worker is running and waiting for jobs...');
