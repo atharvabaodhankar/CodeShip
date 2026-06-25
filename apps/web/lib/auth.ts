@@ -8,6 +8,7 @@ export interface SessionPayload {
   userId: string;
   username: string;
   email: string;
+  githubToken?: string;
 }
 
 export async function signSession(payload: SessionPayload): Promise<string> {
@@ -34,3 +35,21 @@ export async function getSessionUser() {
     where: { id: payload.userId },
   });
 }
+
+/**
+ * Retrieves the GitHub OAuth access token from the active session cookie.
+ */
+export async function getGitHubToken(): Promise<string | null> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('codeship_session')?.value;
+    if (!token) return null;
+
+    const payload = await verifySession(token);
+    return payload?.githubToken || null;
+  } catch (e) {
+    console.error('Failed to retrieve GitHub token from session:', e);
+    return null;
+  }
+}
+

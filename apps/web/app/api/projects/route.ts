@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@codeship/db';
-import { getSessionUser } from '@/lib/auth';
+import { getSessionUser, getGitHubToken } from '@/lib/auth';
 import { getDeploymentQueue } from '@/lib/queue';
 
 // URL-friendly slug generator with uniqueness guarantee
@@ -96,6 +96,47 @@ export async function POST(request: Request) {
 
     // Enqueue the build job in BullMQ
     await getDeploymentQueue().add('build', { deploymentId: deployment.id });
+
+    // 6. Automatically register webhook on GitHub to enable automated push-to-deploy (Vercel-like experience)
+    try {
+      const githubToken = await getGitHubToken();
+      if (githubToken && githubRepo && githubRepo.includes('/')) {
+        const host = request.headers.get('host') || 'localhost:3000';
+        const protocol = host.startsWith('localhost') ? 'http' : 'https';
+        const webhookUrl = `${protocol}://${host}/api/webhooks/github`;
+
+        console.log(`[Webhook Auto-Register] Registering webhook for repo: ${githubRepo} pointing to: ${webhookUrl}...`);
+        
+        const githubHookResponse = await fetch(`https://api.github.com/repos/${githubRepo}/hooks`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${githubToken}`,
+            Accept: 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+            'User-Agent': 'CodeShip-App',
+          },
+          body: JSON.stringify({
+            name: 'web',
+            active: true,
+            events: ['push'],
+            config: {
+              url: webhookUrl,
+              content_type: 'json',
+              insecure_ssl: '0',
+            },
+          }),
+        });
+
+        if (githubHookResponse.ok) {
+          console.log(`[Webhook Auto-Register] Successfully registered webhook for ${githubRepo}`);
+        } else {
+          const errText = await githubHookResponse.text();
+          console.warn(`[Webhook Auto-Register] GitHub API returned status ${githubHookResponse.status}: ${errText}`);
+        }
+      }
+    } catch (err: any) {
+      console.error('[Webhook Auto-Register] Failed to auto-register repository hook:', err);
+    }
 
     return NextResponse.json({ project, deployment }, { status: 201 });
   } catch (error: any) {

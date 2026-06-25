@@ -99,6 +99,7 @@ export async function GET(request: Request) {
       userId: user.id,
       username: user.username,
       email: user.email,
+      githubToken: accessToken, // Store the GitHub access token in the session cookie!
     });
 
     // 6. Set Cookie & Redirect
