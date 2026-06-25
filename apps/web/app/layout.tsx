@@ -15,6 +15,9 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata = {
   title: 'Rovel | Lightweight PaaS',
   description: 'Deploy React, Next.js, and Express applications in isolated Docker containers instantly.',
+  icons: {
+    icon: '/logo.ico',
+  },
 };
 
 export default function RootLayout({
