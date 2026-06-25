@@ -12,6 +12,20 @@ CodeShip is a self-hosted, lightweight Platform-as-a-Service (PaaS) inspired by 
 
 ---
 
+## ✨ Key Features & Platform Upgrades
+
+In addition to its core PaaS capabilities, CodeShip includes several production-grade features and developer-experience enhancements:
+
+* **Vercel-like Automated GitOps Webhooks**: Registers repository push webhooks automatically via secure cookie-based GitHub OAuth tokens, enabling instant zero-downtime redeployments on every git push.
+* **Subdirectory & Monorepo Deployments**: Allows targeting nested directories (e.g., `apps/web` or `packages/frontend`) for framework detection, build context isolation, and Docker containerization.
+* **Secure Admin Portal (`/admin`)**: A restricted management dashboard gated to authorized operators (`atharvabaodhankar`). Features live system telemetry, global project/user directories, remote container power controls (start, stop, restart, delete), and interactive Docker pruning logs.
+* **Premium Theme & Custom Components**: High-fidelity dark developer theme with an interactive scanline landing page, custom search-filterable React Combobox inputs, and robust client-side rendering protection.
+
+> [!NOTE]
+> For an in-depth breakdown of every capability, implementation detail, and security guardrail, see the dedicated [FEATURES.md](file:///c:/Users/baodh/OneDrive/Desktop/Projects/CodeShip/FEATURES.md) guide.
+
+---
+
 ## 🏗️ Core Architecture
 
 CodeShip uses a decoupled, event-driven architecture to coordinate between the Next.js web console and the background execution workers. This ensures the web UI remains fast and responsive while heavy container builds run safely in a managed queue.
@@ -91,6 +105,9 @@ CodeShip automatically inspects your repository, detects the framework, generate
 | **Next.js** | `package.json` with `next` | **Production Node Build**: Installs dependencies, compiles Next.js pages, starts server (`next start`) on `node:20-alpine`. | `3000` (internal) |
 | **Express.js** | `package.json` with `express` | **Node Production Server**: Installs dependencies and boots the server (`npm start`) on `node:20-alpine`. | `3000` (internal) |
 
+> [!TIP]
+> **Subdirectory Deployments**: If your application is located in a nested subdirectory (e.g. inside a monorepo structure), CodeShip will isolate the build context to that folder, execute auto-detection locally, and run the container build scoped to that directory path.
+
 ---
 
 ## 🛠️ Technology Deep-Dive: What, How, and Why
@@ -125,6 +142,16 @@ CodeShip is organized as a modular npm monorepo utilizing workspaces to isolate 
 * **How**: The worker dynamically writes Nginx configurations at `/etc/nginx/sites-enabled/<project-slug>.conf` mapping the subdomain (e.g. `test-api.apps.domain`) to the allocated host port, and reloads Nginx via a passwordless sudoers rule. The worker automatically detects the wildcard certificate on the host to configure HTTPS (port `443`) and HTTP-to-HTTPS redirects.
 * **Why**: Nginx serves as the secure entry point of the VPS, keeping internal application ports (`3001-9999`) safely hidden behind the firewall. A wildcard SSL certificate allows securing an infinite number of subdomains instantly without hitting Let's Encrypt rate limits.
 
+### 🔗 Vercel-like Automated Webhook Deployments
+* **What**: Secure, session-based webhook automation using cookie-persisted GitHub OAuth tokens.
+* **How**: When a project is created, the system fetches the OAuth token securely via an encrypted cookie, dynamically resolves the webhook URL (supporting localhost development tunnels as well as production setups), and calls the GitHub Hooks API to register a push webhook.
+* **Why**: Delivers a fully automated developer flow without requiring manual token database records or tedious manual repository configurations.
+
+### 🛡️ Secure Admin Portal & Operator Toolkit
+* **What**: An administrator dashboard gated strictly to the username configured in `ADMIN_USERNAMES` (default: `atharvabaodhankar`).
+* **How**: Combines API-level security checks with a UI containing system telemetry (CPU, RAM, disk, container counts), global user/project directories, active container management actions, and an SSE-powered streaming Docker pruning terminal.
+* **Why**: Empowers platform operators to audit resource consumption, manage hosted projects, and clean up server disk space without SSH access.
+
 ---
 
 ## 🔒 Production Hardening & Security
@@ -156,3 +183,4 @@ The CodeShip platform itself is fully automated via GitHub Actions:
 1. Pushing to the `main` branch of the CodeShip repository triggers the `.github/workflows/deploy.yml` workflow.
 2. The runner connects to the production VPS via SSH using an authorized private key secret (`VPS_SSH_KEY`).
 3. The runner executes the `./update.sh` script, which pulls the latest platform code, installs npm packages, runs Prisma database migrations, rebuilds Next.js and the worker, and restarts all services under the **PM2** process manager.
+
