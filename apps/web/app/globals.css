@@ -63,3 +63,15 @@ body {
   outline: 1px solid #ffffff;
   outline-offset: 2px;
 }
+
+/* Mockup Layout Utility Classes */
+.border-layout {
+  border-color: #1a1a1a;
+}
+.card-bg {
+  background-color: #0b0b0b;
+}
+.hover-bg:hover {
+  background-color: #111111;
+}
+
