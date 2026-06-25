@@ -34,8 +34,8 @@ export default function LandingPage() {
       {/* Top Header Navigation */}
       <header className="fixed top-0 left-0 w-full h-16 flex items-center justify-between px-page-padding bg-black/80 backdrop-blur-md z-50 border-b border-white/5">
         <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Rovel Logo" className="w-6 h-6 rounded object-cover" />
           <span className="font-display text-lg tracking-tighter text-white font-bold uppercase select-none">Rovel</span>
-          <span className="text-[10px] font-mono text-neutral-500 border border-neutral-800 px-1.5 py-0.5 rounded uppercase">v2.4.0</span>
         </div>
         <nav className="hidden md:flex items-center gap-8 font-mono text-xs text-neutral-400">
           <a className="hover:text-white transition-colors" href="https://github.com" target="_blank" rel="noreferrer">Documentation</a>
@@ -79,7 +79,7 @@ export default function LandingPage() {
 
             <p className="max-w-2xl mx-auto text-sm md:text-base text-neutral-400 font-light leading-relaxed">
               A lightweight, self-hosted PaaS inspired by Render and Vercel. <br className="hidden md:block" />
-              Deploy React, Next.js, and Express apps in isolated Docker containers instantly.
+              Deploy Next.js, React, Nuxt, Astro, Go, and Python apps in isolated Docker containers instantly.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6 w-full sm:w-auto">
@@ -136,7 +136,7 @@ export default function LandingPage() {
                 <Zap className="text-white mb-6" size={32} />
                 <h3 className="font-display text-lg font-bold text-white mb-3">Zero Config Builds</h3>
                 <p className="text-neutral-400 text-xs font-light leading-relaxed">
-                  No Dockerfiles required. Rovel automatically analyzes your project code—whether it's React, Node, or Next.js—to compile, build, and deploy without manual intervention.
+                  No Dockerfiles required. Rovel automatically analyzes your project code—whether it's Next.js, React, Nuxt, Astro, Go, or Python—to compile, build, and deploy without manual intervention.
                 </p>
               </div>
               <div className="mt-8 flex items-center gap-2 text-[10px] font-mono text-neutral-500 group-hover:text-white transition-colors cursor-pointer">
