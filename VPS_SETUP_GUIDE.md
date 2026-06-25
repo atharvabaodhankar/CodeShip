@@ -1,6 +1,6 @@
 # Rovel VPS Setup Guide: From Scratch to Production
 
-This guide provides a comprehensive, step-by-step walkthrough to set up and deploy the **Rovel PaaS** platform on a brand-new Ubuntu VPS. It includes all terminal commands, configuration files, security hardening steps, and troubleshooting tips learned during the initial platform setup.
+This guide provides a comprehensive, step-by-step walkthrough to set up and deploy the **Rovel PaaS** platform on a brand-new Ubuntu VPS. It includes all terminal commands, configuration files, security hardening steps, and troubleshooting tips learned during production deployments.
 
 ---
 
@@ -12,9 +12,13 @@ This guide provides a comprehensive, step-by-step walkthrough to set up and depl
 * **Production Specifications**: 4 vCPUs, 8 GB RAM, 160 GB SSD (allocates resource overhead for multiple isolated user containers)
 
 ### 2. Domain & DNS Configuration
-Go to your DNS provider (e.g. DigitalOcean, Cloudflare) and create two `A` records pointing to your VPS IP:
-* `console.rovel.dev` ──► `YOUR_VPS_IP` (Dashboard console)
-* `*.apps.rovel.yourdomain.com` ──► `YOUR_VPS_IP` (Wildcard for deployed user applications)
+Go to your DNS provider (e.g., Name.com, Cloudflare, DigitalOcean) and create these **three A records** pointing to your VPS public IP:
+
+| Type | Host / Name | Value / Answer | Purpose |
+| :--- | :--- | :--- | :--- |
+| **A** | `@` (or blank) | `YOUR_VPS_IP` | Main landing page website (`rovel.yourdomain.com` or `rovel.dev`). |
+| **A** | `console` | `YOUR_VPS_IP` | Developer dashboard console (`console.rovel.yourdomain.com` or `console.rovel.dev`). |
+| **A** | `*.apps` | `YOUR_VPS_IP` | Wildcard record routing all deployed user projects (`*.apps.rovel.yourdomain.com`). |
 
 ---
 
@@ -101,12 +105,12 @@ JWT_SECRET="YOUR_RANDOM_JWT_SECRET_STRING"
 ENCRYPTION_KEY="YOUR_EXACTLY_32_CHARACTER_KEY"
 
 # Domain Routing Configuration
-# Set to your wildcard base domain
+# Set to your wildcard base domain for user applications
 BASE_DOMAIN="apps.rovel.yourdomain.com"
 NEXT_PUBLIC_BASE_DOMAIN="apps.rovel.yourdomain.com"
 
 # GitHub OAuth App Configuration
-# Create a GitHub OAuth App pointing to https://console.rovel.dev
+# Create a GitHub OAuth App pointing to https://console.rovel.yourdomain.com
 GITHUB_CLIENT_ID="YOUR_GITHUB_CLIENT_ID"
 GITHUB_CLIENT_SECRET="YOUR_GITHUB_CLIENT_SECRET"
 
@@ -115,6 +119,11 @@ PORT_RANGE_START=3001
 PORT_RANGE_END=9999
 BUILDS_DIR="/opt/rovel/builds"
 ```
+
+> [!IMPORTANT]
+> **PM2 Environment Caching Gotcha**:
+> PM2 caches environment variables when a process is first started. Whenever you modify your `.env` file on the VPS, simply running `pm2 restart` is **not** enough. You must force PM2 to reload the environment variables by running:
+> `pm2 restart all --update-env`
 
 ---
 
@@ -139,7 +148,7 @@ node -e "require('dotenv').config(); require('child_process').spawn('npm', ['run
 ```
 
 ### 4. Compile all Monorepo Workspaces
-Build the Next.js frontend console and compiling the TypeScript worker code:
+Build the Next.js frontend console and compile the TypeScript worker code:
 ```bash
 npm run build:all
 ```
@@ -166,11 +175,19 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-### 2. Provision SSL for the Dashboard
-Install Certbot and request a certificate for the main dashboard subdomain:
+### 2. Configure GitHub OAuth App Settings
+For the login flow to succeed, your GitHub OAuth application settings **must exactly match** your console subdomain:
+1. Go to your **GitHub Settings** ──► **Developer Settings** ──► **OAuth Apps** ──► Select your App.
+2. Update the fields:
+   * **Homepage URL**: `https://console.rovel.yourdomain.com` (or `https://rovel.yourdomain.com`)
+   * **Authorization Callback URL**: `https://console.rovel.yourdomain.com/api/auth/callback`
+   *(If the Callback URL does not match your active dashboard domain exactly, GitHub will reject authentication requests with a `redirect_uri_mismatch` error).*
+
+### 3. Provision SSL for the Dashboard Subdomain
+Install Certbot and request a certificate for the console (and root domain if hosting the landing page on the same server):
 ```bash
 sudo apt-get install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d console.rovel.dev
+sudo certbot --nginx -d console.rovel.yourdomain.com -d rovel.yourdomain.com
 ```
 *(Certbot will automatically edit your Nginx files to handle HTTPS and redirect all HTTP traffic to port 443).*
 
@@ -181,27 +198,29 @@ sudo certbot --nginx -d console.rovel.dev
 To serve user applications securely (HTTPS) without Let's Encrypt rate limit issues, we must obtain a wildcard certificate using a DNS challenge.
 
 ### 1. Request the Wildcard Certificate
+Run the manual Certbot challenge for your wildcard application namespace:
 ```bash
 sudo certbot certonly --manual --preferred-challenges=dns -d "*.apps.rovel.yourdomain.com" -d "apps.rovel.yourdomain.com"
 ```
 
-### 2. Add the DNS TXT Record
-Certbot will pause and output a TXT record value. 
-1. Open your DNS provider (e.g. DigitalOcean DNS settings).
+### 2. Add the DNS TXT Record (Manual DNS Challenge)
+Certbot will temporarily pause and print a verification string.
+1. Log into your DNS provider (e.g., Name.com, Cloudflare).
 2. Create a new record:
    * **Type**: `TXT`
-   * **Name**: `_acme-challenge.apps`
-   * **Value**: Paste the long verification string from Certbot.
-   * **TTL**: `60` seconds (lowest possible).
-3. Wait 30 seconds, then return to the VPS terminal and press **Enter** to complete the challenge.
+   * **Name/Host**: `_acme-challenge.apps`
+   * **Value/Answer**: *(Paste the long verification string provided by Certbot)*
+   * **TTL**: `60` seconds (lowest possible value to ensure rapid propagation).
+3. Wait 30 seconds for the TXT record to propagate globally.
+4. Return to your VPS terminal and press **Enter** to complete the challenge.
 
-The certificate will be saved at `/etc/letsencrypt/live/apps.rovel.yourdomain.com/fullchain.pem`.
+The wildcard certificate will be saved at `/etc/letsencrypt/live/apps.rovel.yourdomain.com/fullchain.pem`. Rovel's background worker is pre-configured to look for this path to secure all deployed user containers instantly.
 
 ---
 
 ## ⚙️ Step 7: Manage Services under PM2
 
-To ensure the Rovel services run persistently in the background and survive system crashes or server reboots, we run them under the **PM2** process manager.
+To ensure Rovel services run persistently in the background and survive system crashes or server reboots, we run them under the **PM2** process manager.
 
 ### 1. Install PM2 Globally
 ```bash
@@ -263,7 +282,7 @@ git pull
 npm install
 node -e "require('dotenv').config(); require('child_process').spawn('npm', ['run', 'db:push', '-w', 'packages/db'], { stdio: 'inherit', shell: true })"
 npm run build:all
-pm2 restart all
+pm2 restart all --update-env
 ```
 Save, exit, and make it executable:
 ```bash
@@ -278,3 +297,21 @@ Go to your **GitHub Repository** -> **Settings** -> **Secrets and variables** ->
 * **`VPS_SSH_KEY`**: *(Paste the private key copied in Step 3)*
 
 Now, whenever you run `git push` on your local machine, GitHub Actions will securely log into your VPS and update the entire platform.
+
+---
+
+## 🛠️ Production Troubleshooting & Gotchas
+
+### 1. The `ERR_CERT_COMMON_NAME_INVALID` Subdomain Error
+*   **The Issue**: When navigating to a newly deployed project (e.g. `https://my-app.apps.rovel.dev`), the browser displays a privacy warning stating the certificate belongs to `console.rovel.dev` or a different domain.
+*   **The Cause**: The wildcard SSL certificate has not been successfully provisioned on the VPS, or the Nginx config has not been generated for the new domain name.
+*   **The Fix**:
+    1. Verify the certificate directory exists: `ls -la /etc/letsencrypt/live/apps.rovel.yourdomain.com/`.
+    2. If missing, run the Certbot Wildcard DNS challenge (Step 6).
+    3. If the cert exists, make sure you restarted PM2 with `--update-env` to reload the `BASE_DOMAIN`.
+    4. Click **Redeploy** on the project page in the Rovel dashboard. (Nginx files for projects are generated *during build-time*, so you must redeploy to write the new configuration).
+
+### 2. All Deployed Subdomains Default to the Dashboard
+*   **The Issue**: Accessing any user application subdomain redirects you to the Rovel login page instead.
+*   **The Cause**: Nginx does not have a specific server block for the project subdomain, so it falls back to the first available server block (the dashboard).
+*   **The Fix**: Check the worker logs in the dashboard or run `pm2 logs rovel-worker` to see if Nginx reloads failed due to a syntax error. Ensure that Nginx reload permissions are set up correctly on the VPS.
