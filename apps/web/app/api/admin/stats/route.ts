@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@codeship/db';
+import { prisma } from '@rovel/db';
 import { isUserAdminOrThrow } from '@/lib/admin';
 import { getDeploymentQueue } from '@/lib/queue';
 import { exec } from 'child_process';

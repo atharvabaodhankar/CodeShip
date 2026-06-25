@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@codeship/db';
+import { prisma } from '@rovel/db';
 import { getSessionUser } from '@/lib/auth';
-import { encrypt, decrypt } from '@codeship/shared';
+import { encrypt, decrypt } from '@rovel/shared';
 
 export async function GET(
   request: Request,

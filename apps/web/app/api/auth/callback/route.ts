@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { prisma } from '@codeship/db';
+import { prisma } from '@rovel/db';
 import { signSession } from '@/lib/auth';
 
 export async function GET(request: Request) {

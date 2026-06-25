@@ -1,5 +1,5 @@
 {
-  "name": "@codeship/worker",
+  "name": "@rovel/worker",
   "version": "1.0.0",
   "private": true,
   "main": "dist/index.js",
@@ -9,8 +9,8 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@codeship/db": "*",
-    "@codeship/shared": "*",
+    "@rovel/db": "*",
+    "@rovel/shared": "*",
     "bullmq": "^5.34.0",
     "dotenv": "^16.4.7",
     "simple-git": "^3.27.0"

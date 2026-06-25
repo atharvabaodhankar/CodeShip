@@ -13,7 +13,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: 'CodeShip | Lightweight PaaS',
+  title: 'Rovel | Lightweight PaaS',
   description: 'Deploy React, Next.js, and Express applications in isolated Docker containers instantly.',
 };
 

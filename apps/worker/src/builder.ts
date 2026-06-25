@@ -1,5 +1,5 @@
-import { prisma } from '@codeship/db';
-import { decrypt, isWindows } from '@codeship/shared';
+import { prisma } from '@rovel/db';
+import { decrypt, isWindows } from '@rovel/shared';
 import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';

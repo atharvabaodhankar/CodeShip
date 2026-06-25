@@ -1,8 +1,8 @@
-# CodeShip - MVP System Design
+# Rovel - MVP System Design
 
 ## Overview
 
-CodeShip is a lightweight Platform-as-a-Service (PaaS) inspired by Render and Vercel.
+Rovel is a lightweight Platform-as-a-Service (PaaS) inspired by Render and Vercel.
 
 Users can:
 
@@ -117,7 +117,7 @@ Git
                            │
                            ▼
                  ┌──────────────────┐
-                 │   CodeShip API   │
+                 │    Rovel API     │
                  └────────┬─────────┘
                           │
                           ▼
@@ -287,7 +287,7 @@ git clone <repo>
 
 into:
 
-/opt/codeship/builds/{deploymentId}
+/opt/rovel/builds/{deploymentId}
 
 ---
 
@@ -344,7 +344,7 @@ docker build
 
 Tag:
 
-codeship-{deploymentId}
+rovel-{deploymentId}
 
 ---
 
@@ -558,7 +558,7 @@ Scripts
 
 ---
 
-# CI/CD For CodeShip
+# CI/CD For Rovel
 
 GitHub Actions
 

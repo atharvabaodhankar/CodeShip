@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@codeship/db';
+import { prisma } from '@rovel/db';
 import { getSessionUser } from '@/lib/auth';
 import { getDeploymentQueue } from '@/lib/queue';
 import fs from 'fs';

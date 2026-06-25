@@ -41,9 +41,9 @@ export default function SidebarLayout({
           onClick={() => router.push('/dashboard')}
           className="px-gutter mb-stack-lg flex items-center gap-3 cursor-pointer select-none"
         >
-          <img src="/logo.png" alt="CodeShip Logo" className="w-8 h-8 rounded object-cover" />
+          <img src="/logo.png" alt="Rovel Logo" className="w-8 h-8 rounded object-cover" />
           <div>
-            <div className="font-display text-primary uppercase tracking-tighter text-xl font-bold">CodeShip</div>
+            <div className="font-display text-primary uppercase tracking-tighter text-xl font-bold">Rovel</div>
             <div className="font-metadata text-neutral-500 text-xs font-mono">v2.4.0</div>
           </div>
         </div>
@@ -185,8 +185,8 @@ export default function SidebarLayout({
             ) : (
               <>
                 <span className="md:hidden flex items-center gap-2">
-                  <img src="/logo.png" alt="CodeShip Logo" className="w-6 h-6 rounded object-cover" />
-                  CodeShip
+                  <img src="/logo.png" alt="Rovel Logo" className="w-6 h-6 rounded object-cover" />
+                  Rovel
                 </span>
                 <span className="hidden md:inline font-mono text-xs tracking-widest text-neutral-500 uppercase">CONTROL PLANE</span>
               </>

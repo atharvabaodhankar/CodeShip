@@ -1,6 +1,6 @@
-# CodeShip VPS Setup Guide: From Scratch to Production
+# Rovel VPS Setup Guide: From Scratch to Production
 
-This guide provides a comprehensive, step-by-step walkthrough to set up and deploy the **CodeShip PaaS** platform on a brand-new Ubuntu VPS. It includes all terminal commands, configuration files, security hardening steps, and troubleshooting tips learned during the initial platform setup.
+This guide provides a comprehensive, step-by-step walkthrough to set up and deploy the **Rovel PaaS** platform on a brand-new Ubuntu VPS. It includes all terminal commands, configuration files, security hardening steps, and troubleshooting tips learned during the initial platform setup.
 
 ---
 
@@ -13,8 +13,8 @@ This guide provides a comprehensive, step-by-step walkthrough to set up and depl
 
 ### 2. Domain & DNS Configuration
 Go to your DNS provider (e.g. DigitalOcean, Cloudflare) and create two `A` records pointing to your VPS IP:
-* `codeship.yourdomain.com` ──► `YOUR_VPS_IP` (Dashboard console)
-* `*.apps.yourdomain.com` ──► `YOUR_VPS_IP` (Wildcard for deployed user applications)
+* `deploy.rovel.yourdomain.com` ──► `YOUR_VPS_IP` (Dashboard console)
+* `*.apps.rovel.yourdomain.com` ──► `YOUR_VPS_IP` (Wildcard for deployed user applications)
 
 ---
 
@@ -22,10 +22,10 @@ Go to your DNS provider (e.g. DigitalOcean, Cloudflare) and create two `A` recor
 
 Log into your fresh VPS as `root` via SSH and run these commands:
 
-### 1. Clone the CodeShip Repository
+### 1. Clone the Rovel Repository
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/CodeShip.git
-cd CodeShip
+git clone https://github.com/YOUR_GITHUB_USERNAME/Rovel.git
+cd Rovel
 ```
 
 ### 2. Run the Bootstrap Script
@@ -82,17 +82,17 @@ nano .env
 Paste the template below, replace the domain, secrets, and GitHub credentials, and save the file (press `Ctrl + O`, `Enter`, and `Ctrl + X` to exit):
 
 ```env
-# CodeShip Production Environment Variables
+# Rovel Production Environment Variables
 
 # Database & Redis Configuration
 # Replace 'YOUR_SECURE_PASSWORD' with a strong random string
-DATABASE_URL="postgresql://postgres:YOUR_SECURE_PASSWORD@localhost:5432/codeship?schema=public"
+DATABASE_URL="postgresql://postgres:YOUR_SECURE_PASSWORD@localhost:5432/rovel?schema=public"
 REDIS_URL="redis://localhost:6379"
 
 # Local Docker Database Credentials (used by Docker Compose)
 DB_USER=postgres
 DB_PASSWORD=YOUR_SECURE_PASSWORD
-DB_NAME=codeship
+DB_NAME=rovel
 
 # Security Secrets (Generate unique keys for this VPS)
 # JWT_SECRET: Secure 32-byte key for signing session tokens (e.g., openssl rand -hex 32)
@@ -102,18 +102,18 @@ ENCRYPTION_KEY="YOUR_EXACTLY_32_CHARACTER_KEY"
 
 # Domain Routing Configuration
 # Set to your wildcard base domain
-BASE_DOMAIN="apps.yourdomain.com"
-NEXT_PUBLIC_BASE_DOMAIN="apps.yourdomain.com"
+BASE_DOMAIN="apps.rovel.yourdomain.com"
+NEXT_PUBLIC_BASE_DOMAIN="apps.rovel.yourdomain.com"
 
 # GitHub OAuth App Configuration
-# Create a GitHub OAuth App pointing to https://codeship.yourdomain.com
+# Create a GitHub OAuth App pointing to https://deploy.rovel.yourdomain.com
 GITHUB_CLIENT_ID="YOUR_GITHUB_CLIENT_ID"
 GITHUB_CLIENT_SECRET="YOUR_GITHUB_CLIENT_SECRET"
 
 # Deployment Configuration
 PORT_RANGE_START=3001
 PORT_RANGE_END=9999
-BUILDS_DIR="/opt/codeship/builds"
+BUILDS_DIR="/opt/rovel/builds"
 ```
 
 ---
@@ -153,8 +153,8 @@ We must route public traffic to our Next.js server (running on port `3000`) and 
 ### 1. Configure the Nginx Proxy
 Copy our template, remove Nginx's default fallback page, and reload Nginx:
 ```bash
-# Copy the CodeShip configuration
-sudo cp infrastructure/nginx/codeship.conf /etc/nginx/sites-enabled/
+# Copy the Rovel configuration
+sudo cp infrastructure/nginx/rovel.conf /etc/nginx/sites-enabled/
 
 # Remove the default site
 sudo rm -f /etc/nginx/sites-enabled/default
@@ -170,7 +170,7 @@ sudo systemctl reload nginx
 Install Certbot and request a certificate for the main dashboard subdomain:
 ```bash
 sudo apt-get install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d codeship.yourdomain.com
+sudo certbot --nginx -d deploy.rovel.yourdomain.com
 ```
 *(Certbot will automatically edit your Nginx files to handle HTTPS and redirect all HTTP traffic to port 443).*
 
@@ -182,7 +182,7 @@ To serve user applications securely (HTTPS) without Let's Encrypt rate limit iss
 
 ### 1. Request the Wildcard Certificate
 ```bash
-sudo certbot certonly --manual --preferred-challenges=dns -d "*.apps.yourdomain.com" -d "apps.yourdomain.com"
+sudo certbot certonly --manual --preferred-challenges=dns -d "*.apps.rovel.yourdomain.com" -d "apps.rovel.yourdomain.com"
 ```
 
 ### 2. Add the DNS TXT Record
@@ -195,26 +195,26 @@ Certbot will pause and output a TXT record value.
    * **TTL**: `60` seconds (lowest possible).
 3. Wait 30 seconds, then return to the VPS terminal and press **Enter** to complete the challenge.
 
-The certificate will be saved at `/etc/letsencrypt/live/apps.yourdomain.com/fullchain.pem`.
+The certificate will be saved at `/etc/letsencrypt/live/apps.rovel.yourdomain.com/fullchain.pem`.
 
 ---
 
 ## ⚙️ Step 7: Manage Services under PM2
 
-To ensure the CodeShip services run persistently in the background and survive system crashes or server reboots, we run them under the **PM2** process manager.
+To ensure the Rovel services run persistently in the background and survive system crashes or server reboots, we run them under the **PM2** process manager.
 
 ### 1. Install PM2 Globally
 ```bash
 sudo npm install -g pm2
 ```
 
-### 2. Start CodeShip Services
+### 2. Start Rovel Services
 ```bash
 # 1. Start the Next.js Web Console
-pm2 start npm --name "codeship-dashboard" -- run start -w apps/web
+pm2 start npm --name "rovel-dashboard" -- run start -w apps/web
 
 # 2. Start the Background Deployment Worker
-pm2 start dist/index.js --name "codeship-worker" --cwd apps/worker
+pm2 start dist/index.js --name "rovel-worker" --cwd apps/worker
 ```
 
 ### 3. Persist PM2 across Reboots
@@ -229,12 +229,12 @@ pm2 save
 
 ## 🔄 Step 8: Set Up Automated Platform Updates (CI/CD)
 
-Avoid logging into the VPS to update the CodeShip platform code. We automate this using a dedicated SSH deploy key and a GitHub Actions workflow.
+Avoid logging into the VPS to update the Rovel platform code. We automate this using a dedicated SSH deploy key and a GitHub Actions workflow.
 
 ### 1. Create a Dedicated SSH Key Pair on the VPS
 Generate the keys without a passphrase:
 ```bash
-ssh-keygen -t ed25519 -C "github-actions-codeship" -f ~/.ssh/id_ed25519_github -N ""
+ssh-keygen -t ed25519 -C "github-actions-rovel" -f ~/.ssh/id_ed25519_github -N ""
 ```
 
 ### 2. Authorize the Key on the VPS
@@ -251,7 +251,7 @@ cat ~/.ssh/id_ed25519_github
 *Copy the entire output, including the header and footer.*
 
 ### 4. Create an Update Script on the VPS
-Create an update script inside `~/CodeShip`:
+Create an update script inside `~/Rovel`:
 ```bash
 nano update.sh
 ```

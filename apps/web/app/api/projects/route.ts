@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@codeship/db';
+import { prisma } from '@rovel/db';
 import { getSessionUser, getGitHubToken } from '@/lib/auth';
 import { getDeploymentQueue } from '@/lib/queue';
 
@@ -113,7 +113,7 @@ export async function POST(request: Request) {
             Authorization: `Bearer ${githubToken}`,
             Accept: 'application/vnd.github.v3+json',
             'Content-Type': 'application/json',
-            'User-Agent': 'CodeShip-App',
+            'User-Agent': 'Rovel-App',
           },
           body: JSON.stringify({
             name: 'web',

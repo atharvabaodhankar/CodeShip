@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@codeship/db';
+import { prisma } from '@rovel/db';
 import { getDeploymentQueue } from '@/lib/queue';
 
 export async function POST(request: Request) {

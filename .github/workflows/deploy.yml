@@ -1,4 +1,4 @@
-name: Deploy CodeShip Platform
+name: Deploy Rovel Platform
 
 on:
   push:
@@ -17,5 +17,5 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
-            cd ~/CodeShip
+            cd ~/Rovel
             ./update.sh

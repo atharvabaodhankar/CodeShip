@@ -1,4 +1,4 @@
-# CodeShip
+# Rovel
 
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 15" />
@@ -8,13 +8,13 @@
   <img src="https://img.shields.io/badge/Prisma-ORM-teal?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma ORM" />
 </p>
 
-CodeShip is a self-hosted, lightweight Platform-as-a-Service (PaaS) inspired by Vercel and Render. It provides a zero-config, push-to-deploy developer experience running entirely on your own single VPS. CodeShip automates the entire lifecycle of cloning, building, isolating (Docker), securing (wildcard SSL), and routing (Nginx) your applications.
+Rovel is a self-hosted, lightweight Platform-as-a-Service (PaaS) inspired by Vercel and Render. It provides a zero-config, push-to-deploy developer experience running entirely on your own single VPS. Rovel automates the entire lifecycle of cloning, building, isolating (Docker), securing (wildcard SSL), and routing (Nginx) your applications.
 
 ---
 
 ## ✨ Key Features & Platform Upgrades
 
-In addition to its core PaaS capabilities, CodeShip includes several production-grade features and developer-experience enhancements:
+In addition to its core PaaS capabilities, Rovel includes several production-grade features and developer-experience enhancements:
 
 * **Vercel-like Automated GitOps Webhooks**: Registers repository push webhooks automatically via secure cookie-based GitHub OAuth tokens, enabling instant zero-downtime redeployments on every git push.
 * **Subdirectory & Monorepo Deployments**: Allows targeting nested directories (e.g., `apps/web` or `packages/frontend`) for framework detection, build context isolation, and Docker containerization.
@@ -22,13 +22,13 @@ In addition to its core PaaS capabilities, CodeShip includes several production-
 * **Premium Theme & Custom Components**: High-fidelity dark developer theme with an interactive scanline landing page, custom search-filterable React Combobox inputs, and robust client-side rendering protection.
 
 > [!NOTE]
-> For an in-depth breakdown of every capability, implementation detail, and security guardrail, see the dedicated [FEATURES.md](file:///c:/Users/baodh/OneDrive/Desktop/Projects/CodeShip/FEATURES.md) guide.
+> For an in-depth breakdown of every capability, implementation detail, and security guardrail, see the dedicated [FEATURES.md](FEATURES.md) guide.
 
 ---
 
 ## 🏗️ Core Architecture
 
-CodeShip uses a decoupled, event-driven architecture to coordinate between the Next.js web console and the background execution workers. This ensures the web UI remains fast and responsive while heavy container builds run safely in a managed queue.
+Rovel uses a decoupled, event-driven architecture to coordinate between the Next.js web console and the background execution workers. This ensures the web UI remains fast and responsive while heavy container builds run safely in a managed queue.
 
 ```mermaid
 flowchart TD
@@ -47,7 +47,7 @@ flowchart TD
         Webhook["🔗 Webhook Event"]
     end
 
-    subgraph VPS ["CodeShip Single-VPS Infrastructure (DigitalOcean)"]
+    subgraph VPS ["Rovel Single-VPS Infrastructure (DigitalOcean)"]
         subgraph ControlPlane ["Control Plane (PM2 Managed)"]
             NextJS["⚡ Next.js 15 Web App<br>Dashboard & API"]
             Worker["⚙️ Deployment Worker<br>Node.js Daemon"]
@@ -96,7 +96,7 @@ flowchart TD
 
 ## 📊 Framework Support Matrix
 
-CodeShip automatically inspects your repository, detects the framework, generates an optimized Dockerfile, and provisions the routing configurations.
+Rovel automatically inspects your repository, detects the framework, generates an optimized Dockerfile, and provisions the routing configurations.
 
 | Framework | Detection Signatures | Containerization Method | Default Port |
 | :--- | :--- | :--- | :--- |
@@ -106,13 +106,13 @@ CodeShip automatically inspects your repository, detects the framework, generate
 | **Express.js** | `package.json` with `express` | **Node Production Server**: Installs dependencies and boots the server (`npm start`) on `node:20-alpine`. | `3000` (internal) |
 
 > [!TIP]
-> **Subdirectory Deployments**: If your application is located in a nested subdirectory (e.g. inside a monorepo structure), CodeShip will isolate the build context to that folder, execute auto-detection locally, and run the container build scoped to that directory path.
+> **Subdirectory Deployments**: If your application is located in a nested subdirectory (e.g. inside a monorepo structure), Rovel will isolate the build context to that folder, execute auto-detection locally, and run the container build scoped to that directory path.
 
 ---
 
 ## 🛠️ Technology Deep-Dive: What, How, and Why
 
-CodeShip is organized as a modular npm monorepo utilizing workspaces to isolate packages, speed up compilation times, and share libraries across workspaces.
+Rovel is organized as a modular npm monorepo utilizing workspaces to isolate packages, speed up compilation times, and share libraries across workspaces.
 
 ### ⚡ Control Plane: Next.js 15, TypeScript & Tailwind CSS
 * **What**: Next.js 15 App Router, TypeScript, and a high-contrast monochrome Tailwind CSS UI.
@@ -156,11 +156,11 @@ CodeShip is organized as a modular npm monorepo utilizing workspaces to isolate 
 
 ## 🔒 Production Hardening & Security
 
-CodeShip is built with strict security practices to ensure host stability and data privacy:
+Rovel is built with strict security practices to ensure host stability and data privacy:
 
 > [!IMPORTANT]
 > **Environment Variable Encryption (AES-256-GCM)**:
-> All user-defined environment variables (like database credentials, APIs keys, etc.) are encrypted before being written to the PostgreSQL database. CodeShip uses a shared library (`packages/shared`) implementing Node's native `crypto` module (AES-256-GCM) combined with a SHA-256 key derivation function. Deployed containers only receive the decrypted values at container boot time.
+> All user-defined environment variables (like database credentials, APIs keys, etc.) are encrypted before being written to the PostgreSQL database. Rovel uses a shared library (`packages/shared`) implementing Node's native `crypto` module (AES-256-GCM) combined with a SHA-256 key derivation function. Deployed containers only receive the decrypted values at container boot time.
 
 > [!WARNING]
 > **Host Port Isolation (Firewall)**:
@@ -170,17 +170,16 @@ CodeShip is built with strict security practices to ensure host stability and da
 
 ## 🔄 Continuous Delivery (CD) Pipelines
 
-CodeShip implements a dual-pipeline CD model:
+Rovel implements a dual-pipeline CD model:
 
 ### 1. User Application CD (Automatic Webhooks)
 ```text
-[ Developer runs: git push ] ──► [ GitHub Webhook POST ] ──► [ CodeShip API ] ──► [ BullMQ Queue ] ──► [ Worker Rebuilds Container ]
+[ Developer runs: git push ] ──► [ GitHub Webhook POST ] ──► [ Rovel API ] ──► [ BullMQ Queue ] ──► [ Worker Rebuilds Container ]
 ```
-Once configured, pushing code to your application's GitHub repository instantly triggers a background build. CodeShip compiles the new code, starts the new container, swaps the Nginx routing targets, and shuts down the old container, achieving a zero-downtime redeployment.
+Once configured, pushing code to your application's GitHub repository instantly triggers a background build. Rovel compiles the new code, starts the new container, swaps the Nginx routing targets, and shuts down the old container, achieving a zero-downtime redeployment.
 
-### 2. CodeShip Platform CD (GitHub Actions & PM2)
-The CodeShip platform itself is fully automated via GitHub Actions:
-1. Pushing to the `main` branch of the CodeShip repository triggers the `.github/workflows/deploy.yml` workflow.
+### 2. Rovel Platform CD (GitHub Actions & PM2)
+The Rovel platform itself is fully automated via GitHub Actions:
+1. Pushing to the `main` branch of the Rovel repository triggers the `.github/workflows/deploy.yml` workflow.
 2. The runner connects to the production VPS via SSH using an authorized private key secret (`VPS_SSH_KEY`).
 3. The runner executes the `./update.sh` script, which pulls the latest platform code, installs npm packages, runs Prisma database migrations, rebuilds Next.js and the worker, and restarts all services under the **PM2** process manager.
-

@@ -34,7 +34,7 @@ export default function LandingPage() {
       {/* Top Header Navigation */}
       <header className="fixed top-0 left-0 w-full h-16 flex items-center justify-between px-page-padding bg-black/80 backdrop-blur-md z-50 border-b border-white/5">
         <div className="flex items-center gap-3">
-          <span className="font-display text-lg tracking-tighter text-white font-bold uppercase select-none">CodeShip</span>
+          <span className="font-display text-lg tracking-tighter text-white font-bold uppercase select-none">Rovel</span>
           <span className="text-[10px] font-mono text-neutral-500 border border-neutral-800 px-1.5 py-0.5 rounded uppercase">v2.4.0</span>
         </div>
         <nav className="hidden md:flex items-center gap-8 font-mono text-xs text-neutral-400">
@@ -107,7 +107,7 @@ export default function LandingPage() {
                 <div className="w-2.5 h-2.5 rounded-full bg-neutral-800"></div>
                 <div className="w-2.5 h-2.5 rounded-full bg-neutral-800"></div>
               </div>
-              <div className="text-[10px] text-neutral-500 font-mono">codeship --deploy main</div>
+              <div className="text-[10px] text-neutral-500 font-mono">rovel --deploy main</div>
               <div className="w-8"></div>
             </div>
             <div className="p-6 font-mono text-[11px] text-left text-neutral-400 space-y-1.5 leading-relaxed">
@@ -115,7 +115,7 @@ export default function LandingPage() {
               <div className="flex gap-4"><span className="text-neutral-700">09:41:03</span> <span className="text-white font-bold">INFO</span> <span><span className="text-white underline">Next.js</span> project detected.</span></div>
               <div className="flex gap-4"><span className="text-neutral-700">09:41:04</span> <span className="text-white font-bold">INFO</span> <span>Initializing Docker build (isolated sandboxed)...</span></div>
               <div className="flex gap-4"><span className="text-neutral-700">09:41:12</span> <span className="text-white font-bold">INFO</span> <span>Build layer cached. Reducing build time by 84%.</span></div>
-              <div className="flex gap-4"><span className="text-neutral-700">09:41:14</span> <span className="text-white font-bold">SUCCESS</span> <span>Deployment live at <span className="underline text-white">my-app-v4.codeship.sh</span></span></div>
+              <div className="flex gap-4"><span className="text-neutral-700">09:41:14</span> <span className="text-white font-bold">SUCCESS</span> <span>Deployment live at <span className="underline text-white">my-app-v4.rovel.dev</span></span></div>
               <div className="animate-pulse bg-white h-3.5 w-1.5 inline-block"></div>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function LandingPage() {
                 <Zap className="text-white mb-6" size={32} />
                 <h3 className="font-display text-lg font-bold text-white mb-3">Zero Config Builds</h3>
                 <p className="text-neutral-400 text-xs font-light leading-relaxed">
-                  No Dockerfiles required. CodeShip automatically analyzes your project code—whether it's React, Node, or Next.js—to compile, build, and deploy without manual intervention.
+                  No Dockerfiles required. Rovel automatically analyzes your project code—whether it's React, Node, or Next.js—to compile, build, and deploy without manual intervention.
                 </p>
               </div>
               <div className="mt-8 flex items-center gap-2 text-[10px] font-mono text-neutral-500 group-hover:text-white transition-colors cursor-pointer">
@@ -238,11 +238,11 @@ export default function LandingPage() {
       <footer className="bg-black border-t border-neutral-900 py-12 px-page-padding">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="space-y-2 text-center md:text-left">
-            <div className="font-display text-lg tracking-tighter text-white font-bold uppercase">CodeShip</div>
+            <div className="font-display text-lg tracking-tighter text-white font-bold uppercase">Rovel</div>
             <p className="text-neutral-500 text-xs font-light">Infrastructure for developers who build at the speed of thought.</p>
           </div>
           <div className="flex flex-col md:flex-row items-center gap-6 text-[10px] font-mono text-neutral-500">
-            <span>© 2026 CODESHIP. ALL RIGHTS RESERVED.</span>
+            <span>© 2026 ROVEL. ALL RIGHTS RESERVED.</span>
             <div className="flex gap-4">
               <a href="#" className="hover:text-white transition-colors">Terms</a>
               <a href="#" className="hover:text-white transition-colors">Privacy</a>
