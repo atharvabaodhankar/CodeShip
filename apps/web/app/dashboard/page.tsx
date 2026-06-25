@@ -335,10 +335,10 @@ export default function Dashboard() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <button class="text-neutral-500 hover:text-white transition-colors" title="Notifications">
+            <button className="text-neutral-500 hover:text-white transition-colors" title="Notifications">
               <Bell size={18} />
             </button>
-            <button class="text-neutral-500 hover:text-white transition-colors" title="Help">
+            <button className="text-neutral-500 hover:text-white transition-colors" title="Help">
               <HelpCircle size={18} />
             </button>
           </div>
@@ -455,7 +455,7 @@ export default function Dashboard() {
               {/* Simulated SVG Graph */}
               <div className="flex-grow bg-[#050505] border border-layout rounded relative overflow-hidden min-h-[160px] flex items-end p-2 opacity-80 mt-2">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:2rem_2rem] [mask-image:linear-gradient(to_bottom,transparent,black)]"></div>
-                <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+                <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
                   <path d="M0,80 Q10,70 20,85 T40,60 T60,75 T80,40 T100,50 L100,100 L0,100 Z" fill="url(#grad1)" opacity="0.05"></path>
                   <path d="M0,80 Q10,70 20,85 T40,60 T60,75 T80,40 T100,50" fill="none" stroke="#FFFFFF" strokeWidth="0.5" vectorEffect="non-scaling-stroke"></path>
                   <defs>
@@ -549,6 +549,7 @@ export default function Dashboard() {
                     </thead>
                     <tbody className="font-body-sm text-body-sm divide-y divide-[#1A1A1A] text-sm">
                       {filteredProjects.map((project) => {
+                        const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'localhost';
                         const projectUrl = baseDomain === 'localhost'
                           ? `http://${project.slug}.localhost:${project.assignedPort || '3001'}`
                           : `http://${project.slug}.${baseDomain}`;
