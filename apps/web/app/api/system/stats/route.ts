@@ -53,10 +53,13 @@ async function getDiskUsage(): Promise<number> {
     if (process.platform === 'win32') {
       // Windows: Query C: drive space using PowerShell
       const { stdout } = await execAsync('powershell -Command "Get-PSDrive C | Select-Object Used, Free"');
-      const lines = stdout.trim().split('\n').filter(Boolean);
-      if (lines.length >= 2) {
-        const parts = lines[1].trim().split(/\s+/).map(Number);
-        if (parts.length >= 2) {
+      const lines = stdout.trim().split('\n')
+        .map(l => l.trim())
+        .filter(l => l && !l.includes('---') && !l.toLowerCase().includes('used'));
+      
+      if (lines.length >= 1) {
+        const parts = lines[0].split(/\s+/).map(Number);
+        if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
           const used = parts[0];
           const free = parts[1];
           const total = used + free;
